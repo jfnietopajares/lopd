@@ -1,0 +1,122 @@
+// If you edit this file you need to compile the theme. See README.md for details.
+
+// Global variable overrides. Must be declared before importing Valo.
+
+// Defines the plaintext font size, weight and family. Font size affects general component sizing.
+//$v-font-size: 16px;
+//$v-font-weight: 300;
+//$v-font-family: "Open Sans", sans-serif;
+
+// Defines the border used by all components.
+//$v-border: 1px solid (v-shade 0.7);
+//$v-border-radius: 4px;
+
+// Affects the color of some component elements, e.g Button, Panel title, etc
+//$v-background-color: hsl(210, 0%, 98%);
+// Affects the color of content areas, e.g  Panel and Window content, TextField input etc
+//$v-app-background-color: $v-background-color;
+
+// Affects the visual appearance of all components
+//$v-gradient: v-linear 8%;
+//$v-bevel-depth: 30%;
+//$v-shadow-opacity: 5%;
+
+// Defines colors for indicating status (focus, success, failure)
+//$v-focus-color: valo-focus-color(); // Calculates a suitable color automatically
+//$v-friendly-color: #2c9720;
+//$v-error-indicator-color: #ed473b;
+
+// For more information, see: https://vaadin.com/book/-/page/themes.valo.html
+// Example variants can be copy/pasted from https://vaadin.com/docs/v8/framework/articles/ValoExamples.html
+
+@import "../valo/valo.scss";
+
+@mixin mytheme {
+  @include valo;
+
+.black {
+    color: white;
+    background: #3A3A38;
+}
+ 
+.grey {
+    color: white;
+    background: #808069;
+}
+.grey1 {
+    color: white;
+    background: #B5B59C;
+}
+.grey2 {
+    color: white;
+    background: #EDEDDD;
+}
+.grey3 {
+    color: white;
+    background: #F7F7F5;
+}
+.grey4 {
+    color: white;
+    background: #D4D4BC;
+}
+.grey5 {
+    color: #000000;
+    background: #CFCFCC;
+}
+.grey6 {
+    color: #000000;
+    background: #CFCFCC;
+   // background: #E3E3E1;
+}
+ 
+.green {
+    color: #041E8F ;
+    background: #79973F;
+}
+.green1 {
+    color: #000000;
+    background:#CBEB8F;
+}
+
+.red {
+    color: white;
+    background: #C67171;
+}
+.red1 {
+    color: white;
+    background: #D9A7A7;
+}
+
+.yelow1 {
+    color: #041E8F;
+    background: #D1D186;
+}
+
+.v-textfield  {
+color: #041E8F;
+}
+
+.v-textarea { 
+color: #041E8F;
+}
+
+.v-datefield{ 
+color: #041E8F;
+}
+
+.v-datefield-textfield{ 
+color: #041E8F;
+}
+
+.v-radiobutton { 
+color: #041E8F;
+}
+//.v-app input,
+//.v-app textarea,
+//.v-window input,
+//.v-window textarea,
+//.v-popupview-popup input,
+//.v-popupview-popup textarea
+
+
+}
