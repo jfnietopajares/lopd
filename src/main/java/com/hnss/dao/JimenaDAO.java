@@ -13,13 +13,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.hnss.entidades.Paciente;
+import com.hnss.entidades.PagiLisReg;
+import com.hnss.entidades.RespuestaSql;
 import com.hnss.entidades.Servicio;
 import com.hnss.entidades.Usuario;
 import com.hnss.lopdcaa.MyUI;
 import com.hnss.ui.Notificaciones;
 import com.hnss.utilidades.Constantes;
 import com.hnss.utilidades.Parametros;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.PreparedStatement;
+import java.sql.Types;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class JimenaDAO {
@@ -56,9 +65,9 @@ public class JimenaDAO {
                 Class.forName("com.mysql.jdbc.Driver");
                 conn = DriverManager.getConnection(dbURL2, username, password);
             } catch (ClassNotFoundException ex) {
-                ex.printStackTrace();
+                logger.error("Error de clase ", ex);
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                logger.error("Error sql  ", ex);
             }
         }
 
@@ -115,19 +124,8 @@ public class JimenaDAO {
             usuario.setApellido2(resulSet.getString("apellido2"));
             usuario.setNombre(resulSet.getString("nombre"));
             usuario.setMail(resulSet.getString("email"));
-            // usuario.setPasswordhash(resulSet.getString("password"));
             usuario.setEstado(resulSet.getInt("estado"));
             usuario.setTelefono(resulSet.getString("telefono"));
-            // usuario.setCodcolegiado(resulSet.getString("codcolegiado"));
-            // usuario.setPerfil(new Perfil(resulSet.getLong("perfil")));
-            // usuario.setCargo(resulSet.getLong("cargo"));
-            // usuario.setCategoria(resulSet.getLong("categoria"));
-            // usuario.setCsn(resulSet.getString("csn"));
-            // usuario.setBusca(resulSet.getString("busca"));
-            // usuario.setIp(resulSet.getString("ip"));
-            // usuario.setCias(resulSet.getString("cias"));
-            // usuario.setSesion(resulSet.getString("sesion"));
-            // usuario.setCpf(resulSet.getString("cpf"));
         } catch (SQLException e) {
             logger.error(Notificaciones.SQLERRORRESULSET, e);
         }
@@ -181,38 +179,75 @@ public class JimenaDAO {
         return paciente;
     }
 
+    public PagiLisReg getPaginacionInformes(Paciente paciente, Integer canal) {
+        String sql = "";
+        Connection connection = this.conecta();
+        PagiLisReg paginacion = new PagiLisReg(0, 0, 0, 0, 0, 1);
+        int contador = 0;
+        try {
+            sql = "SELECT count(*) as numero   FROM informes i JOIN historias h ON h.paciente = i.paciente WHERE 1=1 ";
+            sql = sql.concat(" AND i.estado=" + Informe.INFORME_ESTADO_CONSOLIDADO + " AND h.nhc='" + paciente.getNumerohc() + "'");
+            if (canal != null) {
+                sql = sql.concat("   AND i.canal=" + canal);
+            }
+            logger.debug(sql);
+            Statement statement = connection.createStatement();
+            ResultSet resulSet = statement.executeQuery(sql);
+            if (resulSet.next()) {
+                contador = resulSet.getInt("numero");
+            }
+            paginacion.setPrimero(1);
+            paginacion.setUltimo(contador);
+            paginacion.setRegistrosTotales(contador);
+            statement.close();
+            logger.debug(sql);
+        } catch (SQLException e) {
+            logger.error(sql);
+            logger.error(ConexionDAO.ERROR_BBDD_SQL, e);
+        } catch (Exception e) {
+            logger.error("Error.", e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                logger.error(ConexionDAO.ERROR_CLOSE_BBDD_SQL, e);
+            }
+        }
+        return paginacion;
+    }
+
     /*
     El paciente que pasamos como parámetros es un paciente LOPD
     por lo que buscamos por NHC en lugar de por el id
      */
-    public ArrayList<Informe> getListaInformesPaciPaciente(Paciente paciente, Integer canal, int orden) {
-String sql="";
+    public ArrayList<Informe> getListaInformesPaciPaciente(PagiLisReg paginacion, Paciente paciente, Integer canal, int orden) {
+        String sql = "";
         Connection connection = this.conecta();
         ArrayList<Informe> listaInformes = new ArrayList<Informe>();
         if (paciente != null) {
             try {
-                 switch(orden){
-                         case Informe.ORDENFECHA:
-                             sql = " SELECT   row_number() over (ORDER BY i.fecha,i.hora  ) as numeroorden , ";
-                             break;
-                        case Informe.ORDENFECHADESC:
-                             sql = " SELECT   row_number() over (ORDER BY i.fecha desc,i.hora desc ) as numeroorden ,";
-                             break;
-                    }
+                switch (orden) {
+                    case Informe.ORDENFECHA:
+                        sql = " SELECT   row_number() over (ORDER BY i.fecha,i.hora  ) as numeroorden , ";
+                        break;
+                    case Informe.ORDENFECHADESC:
+                        sql = " SELECT   row_number() over (ORDER BY i.fecha desc,i.hora desc ) as numeroorden ,";
+                        break;
+                }
                 sql = sql.concat(sqlInforme);
-                sql = sql.concat(" AND i.estado=" + Informe.VAR_RESGISTRO_ESTADO_NORMAL + " AND h.nhc='" + paciente.getNumerohc() + "'");
+                sql = sql.concat(" AND i.estado=" + Informe.INFORME_ESTADO_CONSOLIDADO + " AND h.nhc='" + paciente.getNumerohc() + "'");
                 if (canal != null) {
                     sql = sql.concat("   AND i.canal=" + canal);
                 }
-                    switch(orden){
-                         case Informe.ORDENFECHA:
-                             sql = sql.concat("  ORDER BY i.fecha,hora ");
-                             break;
-                        case Informe.ORDENFECHADESC:
-                             sql = sql.concat("  ORDER BY i.fecha DESC, i.hora DESC");
-                             break;
-                    }
-               
+                switch (orden) {
+                    case Informe.ORDENFECHA:
+                        sql = sql.concat("  ORDER BY i.fecha,hora ");
+                        break;
+                    case Informe.ORDENFECHADESC:
+                        sql = sql.concat("  ORDER BY i.fecha DESC, i.hora DESC");
+                        break;
+                }
+
                 logger.debug(sql);
                 Statement statement = connection.createStatement();
                 ResultSet resulSet = statement.executeQuery(sql);
@@ -225,10 +260,32 @@ String sql="";
                     servicioBd.setCodigo(resulSet.getString("codigoservicio"));
                     servicioBd.setDescripcion(resulSet.getString("descservcicio"));
                     servicioBd.setIdjimena(resulSet.getLong("idservicio"));
-                    Usuario usuarioBd=Usuario.getUsuairoResulSetJimena(resulSet, null);
-                    Informe informe = Informe.getInformeResulsetJimena(resulSet, false, paciente, centroBd, servicioBd,usuarioBd);
-                    listaInformes.add(informe);
-                    contador++;
+                    Usuario usuarioBd = Usuario.getUsuairoResulSetJimena(resulSet, null);
+                    Informe informe = Informe.getInformeResulsetJimena(resulSet, false, paciente, centroBd, servicioBd, usuarioBd);
+                    informe.setNumeroOrden(resulSet.getInt("numeroorden"));
+                    if (paginacion != null) {
+                        if (paginacion.getDireccion() == 1) {
+                            if (resulSet.getInt("numeroorden") > paginacion.getAnterior()) {
+                                listaInformes.add(informe);
+                                contador++;
+                                if (contador >= paginacion.getNumeroRegistrosPagina()) {
+                                    break;
+                                }
+                            }
+                        } else {
+                            if (resulSet.getInt("numeroorden") >= paginacion.getAnterior()) {
+                                listaInformes.add(informe);
+                                contador++;
+                                if (contador >= paginacion.getNumeroRegistrosPagina()) {
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        informe.setNumeroOrden(resulSet.getInt("numeroorden"));
+                        listaInformes.add(informe);
+                        contador++;
+                    }
                 }
                 statement.close();
             } catch (SQLException e) {
@@ -251,9 +308,14 @@ String sql="";
      * @param id
      * @return
      */
-    public java.sql.Blob getBlobPdfId(Long id) {
+    public java.sql.Blob getBlobPdfInforme(Long id, Connection connectionParam) {
         String sql = "";
-        Connection connection = this.conecta();
+        Connection connection;
+        if (connectionParam != null) {
+            connection = connectionParam;
+        } else {
+            connection = this.conecta();
+        }
         Statement statement;
         java.sql.Blob pdfBlob = null;
         try {
@@ -273,11 +335,50 @@ String sql="";
             logger.error(Notificaciones.EXCEPTION_ERROR, e);
         }
         try {
-            connection.close();
-        } catch (SQLException e) {
+            if (connectionParam == null) 
+                connection.close();
+            }catch (SQLException e) {
             logger.error(ConexionDAO.ERROR_CLOSE_BBDD_SQL, e);
         }
-        return pdfBlob;
+            return pdfBlob;
+        }
+
+    
+
+    public File getFicheroPdfInforme(Long id) {
+        File file = null;
+        DateTimeFormatter fechadma = DateTimeFormatter.ofPattern("YYYYMMddmmss");
+        String cadenaNombre = fechadma.format(LocalDateTime.now());
+        FileOutputStream outpu = null;
+        InputStream inStream = null;
+        Connection  connection = this.conecta();
+        try {
+            String pathname = Constantes.DIRECTORIOREPORTS + System.getProperty("file.separator") + "Informe" + id
+                    + cadenaNombre + ".pdf";
+            file = new File(pathname);
+            outpu = new FileOutputStream(file);
+            Blob archivo = this.getBlobPdfInforme(id,connection);
+            inStream = archivo.getBinaryStream();
+            int size = (int) archivo.length();
+            byte[] buffer = new byte[size];
+            int length = -1;
+            while ((length = inStream.read(buffer)) != -1) {
+                outpu.write(buffer, 0, length);
+            }
+
+        } catch (Exception ioe) {
+            logger.error(ioe);
+        } finally {
+            try {
+                outpu.close();
+                inStream.close();
+                connection.close();
+            } catch (Exception ioe) {
+                logger.error("Cerrendo objetos de conexiones ",ioe);
+            }
+        }
+
+        return file;
     }
 
     public ArrayList<Campos_i> getListaCamposInformes(Long id) {
@@ -286,7 +387,7 @@ String sql="";
         Statement statement;
         ArrayList<Campos_i> listaCampos = new ArrayList<>();
         try {
-            sql = "SELECT *  FROM campos_i  WHERE informe = " + id + " AND estado=" + Informe.VAR_RESGISTRO_ESTADO_NORMAL + " ORDER BY  id";
+            sql = "SELECT *  FROM campos_i  WHERE informe = " + id + " AND estado=" + Informe.INFORME_ESTADO_CONSOLIDADO + " ORDER BY  id";
             logger.debug(sql);
 
             statement = connection.createStatement();
@@ -308,5 +409,71 @@ String sql="";
             }
         }
         return listaCampos;
+    }
+    
+    /*
+    Este método retorna un objeto RespuestaSql para insertar  los resultados 
+    en la tabla de acciones asociado a la incidencia
+    */
+     public RespuestaSql doUpdateInformeBorrado(Long id) {
+        String sql = "";
+        Connection connection = this.conecta();
+        PreparedStatement statement;
+         ResultSet resulSet ;
+         RespuestaSql respuesta= new RespuestaSql(false,"");
+         Boolean actualizado=false;
+        try {
+            sql = "UPDATE  informes SET estado= ?  WHERE id = ?"  ;
+            String sqlMsg= "UPDATE  informes SET estado= "+Informe.INFORME_ESTADO_SUSTITUIDO+"  WHERE id = "+id  ;
+            logger.debug(sqlMsg);
+            statement = connection.prepareStatement(sql);
+             statement.setLong(1, Informe.INFORME_ESTADO_SUSTITUIDO);
+            statement.setLong(2, id);
+            respuesta.setResultado( statement.executeUpdate() > 0);
+            respuesta.setSql(sqlMsg);
+            statement.close();
+        } catch (SQLException e) {
+            logger.error(sql, e);
+        } catch (Exception e) {
+            logger.error(Notificaciones.EXCEPTION_ERROR, e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                logger.error(ConexionDAO.ERROR_CLOSE_BBDD_SQL, e);
+            }
+        }
+        return respuesta;
+    }
+     
+       public RespuestaSql doUpdateInformeCampos_i(Long id) {
+        String sql = "";
+        Connection connection = this.conecta();
+        PreparedStatement statement;
+         ResultSet resulSet ;
+         RespuestaSql respuesta= new RespuestaSql(false,"");
+         Boolean actualizado=false;
+        try {
+            sql = "UPDATE  campos_i SET estado= ?  WHERE informe = ?"  ;
+            String sqlMsg= "UPDATE  campos_i SET estado= "+Informe.INFORME_ESTADO_SUSTITUIDO+"  WHERE informe = "+id  ;
+            logger.debug(sqlMsg);
+            statement = connection.prepareStatement(sql);
+             statement.setLong(1, Informe.INFORME_ESTADO_SUSTITUIDO);
+            statement.setLong(2, id);
+            respuesta.setResultado( statement.executeUpdate() > 0);
+            respuesta.setSql(sqlMsg);
+            statement.close();
+        } catch (SQLException e) {
+            logger.error(sql, e);
+        } catch (Exception e) {
+            logger.error(Notificaciones.EXCEPTION_ERROR, e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                logger.error(ConexionDAO.ERROR_CLOSE_BBDD_SQL, e);
+            }
+        }
+        return respuesta;
     }
 }

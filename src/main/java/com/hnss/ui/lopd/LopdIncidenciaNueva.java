@@ -723,7 +723,7 @@ public class LopdIncidenciaNueva extends VerticalLayout {
 
 					new MandaMail().sendEmail(incidencia.getUsuarioRegistra().getMail(),
 							LopdIncidencia.MAIL_ASUNTO_NUEVA, LopdIncidencia.MAIL_CONTENIDO_CABECERA
-									+ incidencia.getHtmlContenidoRegistro() + LopdIncidencia.MAIL_CONTENIDO_PIE);
+									+ incidencia.getHtmlContenidoSolicitud()+ LopdIncidencia.MAIL_CONTENIDO_PIE);
 					doLimpiaValores();
 					if (usuarioSesion.isLlamadaExterna() == true) {
 						doCerrarVentana();

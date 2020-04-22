@@ -11,6 +11,7 @@ import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -97,7 +98,7 @@ public class Informe {
 
     private Servicio servicio_realizador;
 
-    private Long fecha_proceso;
+    private LocalDateTime fecha_proceso;
 
     private String referencia_almacenamiento;
 
@@ -115,9 +116,11 @@ public class Informe {
 
     private ArrayList<Campos_i> listaCampos = new ArrayList<Campos_i>();
 
-    public final static int VAR_RESGISTRO_ESTADO_NORMAL = 2;
+  public final static int INFORME_ESTADO_EDICION = 1;
+  
+    public final static int INFORME_ESTADO_CONSOLIDADO = 2;
 
-    public final static int VAR_RESGISTRO_ESTADO_SUSTITUIDO = 5;
+    public final static int INFORME_ESTADO_SUSTITUIDO = 5;
 
     public final static int CANAL_DEFECTO = 6;
 
@@ -127,6 +130,8 @@ public class Informe {
 
     protected DateTimeFormatter fechadma = DateTimeFormatter.ofPattern("dd/MM/YYYY");
 
+       protected DateTimeFormatter fechadmahhmm = DateTimeFormatter.ofPattern("dd/MM/YYYY HH:mm");
+       
     private static final Logger logger = LogManager.getLogger(Informe.class);
 
     /**
@@ -167,7 +172,9 @@ public class Informe {
     public Paciente getPaciente() {
         return paciente;
     }
-
+  public String getPacienteNhc() {
+        return paciente.getNumerohc();
+    }
     public void setPaciente(Paciente paciente) {
         this.paciente = paciente;
     }
@@ -428,13 +435,15 @@ public class Informe {
         this.servicio_realizador = servicio_realizador;
     }
 
-    public Long getFecha_proceso() {
+    public LocalDateTime getFecha_proceso() {
         return fecha_proceso;
     }
 
-    public void setFecha_proceso(Long fecha_proceso) {
+    public void setFecha_proceso(LocalDateTime fecha_proceso) {
         this.fecha_proceso = fecha_proceso;
     }
+
+   
 
     public String getReferencia_almacenamiento() {
         return referencia_almacenamiento;
@@ -508,7 +517,7 @@ public class Informe {
         this.listaCampos = listaCampos;
     }
 
-    public String getFechaHora() {
+    public String getFechaHoraInforme() {
         String feString = "";
         if (fecha != null) {
             feString = fechadma.format(fecha);
@@ -521,16 +530,24 @@ public class Informe {
         }
         return feString;
     }
+     public String getFechaHoraProceso() {
+         
+        String feString = "";
+        
+            feString = fechadmahhmm.format(fecha_proceso);
+            
+        return feString;
+    }
 
     public String getFechaHoraServcio() {
         String string = "";
-        string = this.getFechaHora() + "  " + this.getServicio().getCodigo();
+        string = this.getFechaHoraInforme()+ "  " + this.getServicio().getCodigo();
         return string;
     }
 
     public String getFechaHoraServcioDescrip() {
         String string = "";
-        string = this.getFechaHora() + "  " + this.getServicio().getCodigo() + " " + this.getDescripcion20();
+        string = this.getFechaHoraInforme()+ "  " + this.getServicio().getCodigo() + " " + this.getDescripcion20();
 
         return string;
     }
@@ -562,7 +579,7 @@ public class Informe {
     public String getHtmlCabecera() {
         String html = "<b>";
 
-        html = html.concat(" " + this.getFechaHora() + " ");
+        html = html.concat(" " + this.getFechaHoraInforme()+ " ");
 
         if (this.servicio != null) {
             html = html.concat(this.getServicio().getCodigo() + " ");
@@ -577,7 +594,7 @@ public class Informe {
                 + this.getPaciente().getApellidosnombre() + "<hr>");
         return html;
     }
-
+ 
     public String getHtmlCampos_i() {
         String html = "";
         for (Campos_i campo : getListaCampos()) {
@@ -610,15 +627,15 @@ public class Informe {
         }
         return html;
     }
-
-    public File getFilePdf() {
+/*
+    public File getFilePdfInforme() {
         File file = null;
         try {
             FileOutputStream outpu = null;
             String pathname = this.getPathFilePdf();
             file = new File(pathname);
             outpu = new FileOutputStream(file);
-            Blob archivo = new JimenaDAO().getBlobPdfId(id);
+            Blob archivo = new JimenaDAO().getBlobPdfInforme(id,null);
             InputStream inStream = archivo.getBinaryStream();
             int size = (int) archivo.length();
             byte[] buffer = new byte[size];
@@ -627,12 +644,13 @@ public class Informe {
                 outpu.write(buffer, 0, length);
             }
             outpu.close();
+            inStream.close();
         } catch (Exception ioe) {
             logger.error(ioe);
         }
         return file;
     }
-
+*/
     public static Informe getInformeResulsetJimena(ResultSet rs, boolean conCampos_I, Paciente paciente, Centro centro,
             Servicio servicio, Usuario usuario) {
         Informe informe = new Informe();
@@ -692,7 +710,7 @@ public class Informe {
             informe.setTipo_documento(rs.getLong("tipo_documento"));
             informe.setAmbito(rs.getLong("ambito"));
             //     informe.setServicio_realizador(new Servicio(rs.getLong("servicio_realizador")));
-            informe.setFecha_proceso(rs.getLong("fecha_proceso"));
+            informe.setFecha_proceso(Utilidades.getFechaLocalDateTime(rs.getLong("fecha_proceso")));
             informe.setReferencia_almacenamiento(rs.getString("referencia_almacenamiento"));
             informe.setNum_accesos(rs.getInt("num_accesos"));
             //     informe.setProblema(new Proceso(rs.getLong("problema")));

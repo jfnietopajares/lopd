@@ -5,6 +5,7 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -36,6 +37,7 @@ public class VentanaFrm extends Window {
         this.isResizable();
         this.setCaption(captacion);
         this.setCaptionAsHtml(true);
+                this.setContent(vt);
         ui.addWindow(this);
     }
 
@@ -47,7 +49,7 @@ public class VentanaFrm extends Window {
         this.setWidth(vt.getWidth(), vt.getWidthUnits());
         this.setHeightUndefined();
         // this.setHeight(vt.getHeight(), vt.getHeightUnits());
-        this.center();
+     //   this.center();
         this.setModal(true);
         this.isResizeLazy();
         this.isResizable();
@@ -72,7 +74,22 @@ public class VentanaFrm extends Window {
         this.setCaptionAsHtml(true);
         ui.addWindow(this);
     }
-
+ public VentanaFrm(UI ui, VerticalLayout ht, String captacion) {
+        super("", ht);
+        // this.setWidth("440px");
+        // this.setClosable(false);
+        this.setStyleName(ValoTheme.WINDOW_TOP_TOOLBAR);
+        this.setWidth(ht.getWidth(), ht.getWidthUnits());
+        this.setHeightUndefined();
+        // this.setHeight(vt.getHeight(), vt.getHeightUnits());
+        this.center();
+        this.setModal(true);
+        this.isResizeLazy();
+        this.isResizable();
+        this.setCaption(captacion);
+        this.setCaptionAsHtml(true);
+        ui.addWindow(this);
+    }
     public VentanaFrm(String caption, Component content) {
         super(caption, content);
     }

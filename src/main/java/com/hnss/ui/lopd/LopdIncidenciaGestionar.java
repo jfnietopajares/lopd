@@ -39,8 +39,8 @@ public class LopdIncidenciaGestionar extends HorizontalLayout {
 		formulario.setMargin(false);
 		formulario.setSpacing(false);
 		formulario.addComponent(new LopdIncidenciaRespuesta(new LopdIncidencia()));
-		contenedorGrid.setMargin(false);
-		contenedorGrid.setSpacing(false);
+		contenedorGrid.setMargin(true);
+		contenedorGrid.setSpacing(true);
 		contenedorGrid.addComponents(filaFiltro, grid);
 
 		desde = new ObjetosComunes().getFecha("Desde", " desde");

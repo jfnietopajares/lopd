@@ -56,6 +56,7 @@ public class ObjetosComunes {
 		boton.setDescription(descripcion);
 		boton.setCaption(captacion);
 		boton.setHeight("30px");
+                boton.addStyleName(ValoTheme.BUTTON_PRIMARY);
 		return boton;
 	}
 
