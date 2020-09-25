@@ -279,7 +279,7 @@ public class LopdIncidenciaRespuesta extends VerticalLayout {
         jimenaBorraInf.addClickListener(e -> doJimenaBorrarClick());
         contenedorBotonesAyuda.addComponents(jimenaBorraInf);
 
-        grabar = new ObjetosComunes().getBoton("Grabar", "Almacena los datos actuales", "50px", VaadinIcons.CHECK);
+        grabar = new ObjetosComunes().getBoton("Graba", "Almacena los datos actuales", "50px", VaadinIcons.CHECK);
         grabar.addClickListener(e -> grabarClick());
 
         limpiar = new ObjetosComunes().getBoton("Limpia", "", "40px", VaadinIcons.COMPILE);
@@ -288,7 +288,7 @@ public class LopdIncidenciaRespuesta extends VerticalLayout {
         notanueva = new ObjetosComunes().getBoton("Nota", " nueva nota", "50px", VaadinIcons.PLUS);
         notanueva.addClickListener(e -> notanuevaClick());
 
-        adjuntar = new ObjetosComunes().getBoton("AdjuntarDocu", "Adjunta documento a la incidencia", "50px",
+        adjuntar = new ObjetosComunes().getBoton("Adjunta", "Adjunta documento a la incidencia", "50px",
                 VaadinIcons.UPLOAD);
         adjuntar.addClickListener(e -> clickUpload());
 

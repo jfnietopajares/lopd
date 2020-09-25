@@ -297,12 +297,25 @@ public class LopdIncidencia {
                 && !this.getPaciente().getNumerohc().isEmpty()) {
             textHtml = textHtml.concat("<b>Númerohc:  </b>" + this.getPaciente().getNumerohc() + " \n");
             textHtml = textHtml.concat("<b>Paciente: </b> " + this.getPaciente().getApellidosnombre() + " <br> \n");
-            textHtml = textHtml.concat("<b>Documento fecha: </b> " + fechaFormato.format(this.getFechaHoraDocumento()) + " \n");
+            if (this.fechaHoraDocumento != null) {
+                textHtml = textHtml.concat("<b>Documento fecha: </b> " + fechaFormato.format(this.getFechaHoraDocumento()) + " \n");
+            } else {
+                textHtml = textHtml.concat("<b>Documento fecha: </b> \n");
+            }
+
+            if (this.getDescriDocu()!=null) {
             textHtml = textHtml.concat("<b>Documento: </b> " + this.getDescriDocu() + " <br> \n");
+            } else {
+textHtml = textHtml.concat("<b>Documento: </b>   <br> \n");                
+            }
         } else {
 
         }
+        if (this.getDescripcionError()!=null) {
         textHtml = textHtml.concat("<b>Descripción error: </b> " + this.getDescripcionError() + "<hr>");
+        } else {
+            textHtml = textHtml.concat("<b>Descripción error: </b>  <hr>");
+        }
         return textHtml;
     }
 
