@@ -321,6 +321,7 @@ public class LopdIncidenciaDAO extends ConexionDAO {
 
             sql = " SELECT i.*,t.id as idtipo,t.descripcion as descripciontipo,t.sujeto  " + " FROM lopd_incidencias i "
                     + " JOIN lopd_tipos t ON t.id=i.tipo " + " JOIN usuarios u On u.id=i.idusuario " + " WHERE 1=1 ";
+
             if (desde != null) {
                 sql = sql.concat(" AND fecha>=" + Long.toString(Utilidades.getFechayyymmdd(desde)));
             }

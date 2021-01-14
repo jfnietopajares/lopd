@@ -1,14 +1,6 @@
 package com.hnss.lopdcaa;
 
 import com.hnss.dao.ConexionDAO;
-import java.time.LocalDateTime;
-import java.util.Properties;
-
-import javax.servlet.annotation.WebServlet;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.hnss.dao.FuncionalidadDAO;
 import com.hnss.dao.JimenaDAO;
 import com.hnss.dao.PacienteDAO;
@@ -16,6 +8,7 @@ import com.hnss.dao.UsuarioDAO;
 import com.hnss.entidades.Paciente;
 import com.hnss.entidades.Usuario;
 import com.hnss.entidades.lopd.LopdIncidencia;
+import com.hnss.entidades.lopd.LopdSujeto;
 import com.hnss.excepciones.SistemaException;
 import com.hnss.ui.Menu;
 import com.hnss.ui.Notificaciones;
@@ -41,6 +34,11 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Properties;
+import javax.servlet.annotation.WebServlet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser
@@ -96,6 +94,7 @@ public class MyUI extends UI {
             if (doRemoteLogin(vaadinRequest) == true) {
                 LopdIncidencia incidencia = new LopdIncidencia();
                 incidencia.setFechaHora(LocalDateTime.now());
+                incidencia.setSujeto(LopdSujeto.SUJETO_PACIENTE);
                 Usuario usuario = (Usuario) VaadinSession.getCurrent().getAttribute(Constantes.SESSION_USERNAME);
                 incidencia.setUsuarioRegistra(usuario);
                 Paciente paciente = new PacienteDAO().getPacienteNhc(String.valueOf(getSession().getAttribute("NHC")));
