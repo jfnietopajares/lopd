@@ -279,8 +279,8 @@ public class LopdIncidenciaNueva extends VerticalLayout {
         sujetoRadio.setItems(LopdSujeto.LISTASUJETOS_COMPLETA);
         sujetoRadio.setItemCaptionGenerator(LopdSujeto::getDescripcion);
         sujetoRadio.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
-        sujetoRadio.addSelectionListener(e -> saltaSujeto());
         sujetoRadio.setSelectedItem(LopdSujeto.SUJETO_PACIENTE);
+        sujetoRadio.addSelectionListener(e -> saltaSujeto());
         binder.forField(sujetoRadio).bind(LopdIncidencia::getSujeto, LopdIncidencia::setSujeto);
         contenedorSujetos.addComponent(sujetoRadio);
 
@@ -416,6 +416,7 @@ public class LopdIncidenciaNueva extends VerticalLayout {
             contenedorIncidencia.setEnabled(false);
             contenedorCampos.setEnabled(false);
             contenedorDescrip.setEnabled(false);
+            saltaSujeto();
         } else {
             // esta registrando un administrador
             dniRegistra.clear();
